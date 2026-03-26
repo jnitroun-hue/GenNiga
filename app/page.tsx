@@ -4,7 +4,7 @@ import { Layout, ImageIcon, Video, FolderOpen, ArrowRight } from "lucide-react";
 export default function HomePage() {
   const cards = [
     {
-      href: "/constructor",
+      href: "/builder",
       title: "Конструктор",
       description: "Соберите баннер вручную: фоны, текст, блоки преимуществ.",
       icon: Layout,
@@ -77,3 +77,4 @@ export default function HomePage() {
     </div>
   );
 }
+

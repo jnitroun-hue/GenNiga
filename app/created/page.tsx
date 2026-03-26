@@ -57,7 +57,7 @@ export default function CreatedPage() {
         <div className="p-12 text-center rounded-2xl border border-white/10 bg-[#161616]">
           <p className="text-[#a1a1a6] mb-4">Пока нет сохранённых баннеров</p>
           <Link
-            href="/constructor"
+            href="/builder"
             className="text-[var(--brand-orange)] hover:underline"
           >
             Создать в Конструкторе
@@ -92,7 +92,7 @@ export default function CreatedPage() {
             <p className="text-sm text-[#a1a1a6] mb-3 truncate">{banner.headline}</p>
             <div className="flex flex-wrap gap-2">
               <Link
-                href={`/constructor?edit=${banner.id}`}
+                href={`/builder?edit=${banner.id}`}
                 className="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-sm font-medium hover:bg-white/10"
               >
                 Редактировать
@@ -119,3 +119,4 @@ export default function CreatedPage() {
     </div>
   );
 }
+

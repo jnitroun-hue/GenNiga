@@ -15,7 +15,7 @@ import {
 
 const navItems = [
   { href: "/", label: "Главная", icon: Home },
-  { href: "/constructor", label: "Конструктор", icon: Layout },
+  { href: "/builder", label: "Конструктор", icon: Layout },
   { href: "/generator", label: "Генератор банера", icon: ImageIcon },
   { href: "/video", label: "Генератор видео", icon: Video },
   { href: "/created", label: "Созданные", icon: FolderOpen },
@@ -96,3 +96,4 @@ export function LayoutClient({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
