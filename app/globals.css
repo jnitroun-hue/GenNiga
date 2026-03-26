@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-orange: #ff9500;
+  --brand-blue: #007aff;
+  --bg-dark: #0a0a0a;
+  --bg-card: #161616;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1a6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100dvh;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
