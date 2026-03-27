@@ -25,7 +25,8 @@ git push -u origin main
 4. **Environment Variables** (опционально):
    - `USE_OLLAMA` = `true` — для генерации текстов через Ollama
    - `OLLAMA_URL` — URL Ollama API (по умолчанию `http://127.0.0.1:11434`)
-   - `VIDEO_SERVICE_URL` — URL сервиса рендеринга видео
+   - `VIDEO_SERVICE_URL` — URL сервиса рендеринга видео (**только внешний URL**, не `localhost`)
+   - `VIDEO_SERVICE_TOKEN` — общий Bearer-токен между Next.js и видео-сервисом (рекомендуется)
    - `COMFYUI_URL` — локальный ComfyUI (напр. `http://127.0.0.1:8188`) для фоновых изображений
    - `COMFYUI_TXT2IMG_ENDPOINT` — ваш endpoint-адаптер (если есть), напр. `http://127.0.0.1:8188/generate`
    - `POLLINATIONS_MODEL` — модель Pollinations (`flux` по умолчанию)
@@ -36,6 +37,9 @@ git push -u origin main
 > Даже если внешние сервисы лагают, генератор не падает.
 
 5. Deploy.
+
+> **Важно для Vercel:** `localhost` внутри Vercel указывает на сам serverless-инстанс, а не на ваш ПК.
+> Поэтому видео-сервис должен быть вынесен отдельно (Render/Railway/Fly/VPS) и доступен по публичному `https://.../render`.
 
 ---
 

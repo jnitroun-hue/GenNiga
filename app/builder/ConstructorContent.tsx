@@ -96,6 +96,23 @@ export function ConstructorContent() {
     }
   };
 
+  const handleBackgroundFileUpload = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Выберите изображение (JPG/PNG/WEBP)");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      if (!result) return;
+      setBackgroundUrl(result);
+      updateBanner({ backgroundImage: result });
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Конструктор баннера</h1>
@@ -191,6 +208,15 @@ export function ConstructorContent() {
               onChange={(e) => setBackgroundUrl(e.target.value)}
               placeholder="https://..."
               className="w-full px-4 py-2 rounded-lg bg-[#161616] border border-white/10 text-white placeholder:text-[#6b6b70] focus:outline-none focus:ring-2 focus:ring-[var(--brand-orange)]"
+            />
+            <label className="block text-sm font-medium text-[#a1a1a6] mt-3 mb-2">
+              Или загрузить с устройства
+            </label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => handleBackgroundFileUpload(e.target.files?.[0] ?? null)}
+              className="w-full px-4 py-2 rounded-lg bg-[#161616] border border-white/10 text-white file:mr-3 file:rounded-md file:border-0 file:bg-[var(--brand-orange)] file:px-3 file:py-1 file:text-white file:cursor-pointer"
             />
           </div>
 
