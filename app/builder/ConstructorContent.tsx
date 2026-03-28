@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { BannerPreview } from "@/components/BannerPreview";
 import { saveBanner, getStoredBanners } from "@/lib/storage";
-import type { BannerData, BannerFormat } from "@/lib/banner-types";
+import type { BackgroundPosition, BannerData, BannerFormat } from "@/lib/banner-types";
 import { BANNER_SIZES, DEFAULT_BENEFITS } from "@/lib/banner-types";
 import { Download, Plus, Trash2 } from "lucide-react";
 import html2canvas from "html2canvas";
@@ -30,6 +30,7 @@ function createNewBanner(): BannerData {
     benefits: [...DEFAULT_BENEFITS],
     accentColor: "#FF9100",
     backgroundImage: DEFAULT_BG,
+    backgroundPosition: "center",
     createdAt: new Date().toISOString(),
   };
 }
@@ -39,6 +40,8 @@ export function ConstructorContent() {
   const editId = searchParams.get("edit");
   const [banner, setBanner] = useState<BannerData>(createNewBanner);
   const [backgroundUrl, setBackgroundUrl] = useState(DEFAULT_BG);
+  const [backgroundPosition, setBackgroundPosition] = useState<BackgroundPosition>("center");
+  const [downloadFormat, setDownloadFormat] = useState<"png" | "jpeg" | "webp">("png");
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,6 +50,7 @@ export function ConstructorContent() {
       if (found) {
         setBanner(found);
         setBackgroundUrl(found.backgroundImage || DEFAULT_BG);
+        setBackgroundPosition(found.backgroundPosition ?? "center");
       }
     }
   }, [editId]);
@@ -68,7 +72,7 @@ export function ConstructorContent() {
 
   const handleSave = () => {
     const withBg = backgroundUrl
-      ? { ...banner, backgroundImage: backgroundUrl }
+      ? { ...banner, backgroundImage: backgroundUrl, backgroundPosition }
       : banner;
     saveBanner(withBg);
     alert("Баннер сохранён в «Созданные»");
@@ -87,8 +91,15 @@ export function ConstructorContent() {
         height: h,
       });
       const link = document.createElement("a");
-      link.download = `banner-${banner.format}-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
+      const mime =
+        downloadFormat === "jpeg"
+          ? "image/jpeg"
+          : downloadFormat === "webp"
+            ? "image/webp"
+            : "image/png";
+      const quality = downloadFormat === "png" ? undefined : 0.95;
+      link.download = `banner-${banner.format}-${Date.now()}.${downloadFormat === "jpeg" ? "jpg" : downloadFormat}`;
+      link.href = canvas.toDataURL(mime, quality);
       link.click();
     } catch (e) {
       console.error(e);
@@ -149,6 +160,20 @@ export function ConstructorContent() {
               placeholder="СДЕЛАЛИ ПЕРЕПЛАНИРОВКУ И БОИТЕСЬ ШТРАФА?"
               className="w-full px-4 py-2 rounded-lg bg-[#161616] border border-white/10 text-white placeholder:text-[#6b6b70] focus:outline-none focus:ring-2 focus:ring-[var(--brand-orange)]"
             />
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-[#a1a1a6] mb-2">
+                Позиция фона
+              </label>
+              <select
+                value={backgroundPosition}
+                onChange={(e) => setBackgroundPosition(e.target.value as BackgroundPosition)}
+                className="w-full px-4 py-2 rounded-lg bg-[#161616] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-orange)]"
+              >
+                <option value="top">Верх</option>
+                <option value="center">Центр</option>
+                <option value="bottom">Низ</option>
+              </select>
+            </div>
           </div>
 
           <div>
@@ -260,6 +285,15 @@ export function ConstructorContent() {
           </div>
 
           <div className="flex gap-3">
+            <select
+              value={downloadFormat}
+              onChange={(e) => setDownloadFormat(e.target.value as "png" | "jpeg" | "webp")}
+              className="px-3 py-2 rounded-lg bg-[#161616] border border-white/20 text-white"
+            >
+              <option value="png">PNG</option>
+              <option value="jpeg">JPG</option>
+              <option value="webp">WEBP</option>
+            </select>
             <button
               type="button"
               onClick={handleSave}
@@ -284,6 +318,7 @@ export function ConstructorContent() {
               <BannerPreview
                 data={{
                   ...banner,
+                  backgroundPosition,
                   backgroundImage: backgroundUrl || banner.backgroundImage,
                 }}
                 scale={1}

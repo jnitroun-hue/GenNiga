@@ -11,6 +11,7 @@ import { BANNER_SIZES } from "@/lib/banner-types";
 
 export default function CreatedPage() {
   const [banners, setBanners] = useState<BannerData[]>([]);
+  const [downloadFormat, setDownloadFormat] = useState<"png" | "jpeg" | "webp">("png");
   const refsMap = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -34,8 +35,15 @@ export default function CreatedPage() {
         height: h,
       });
       const link = document.createElement("a");
-      link.download = `banner-${banner.format}-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
+      const mime =
+        downloadFormat === "jpeg"
+          ? "image/jpeg"
+          : downloadFormat === "webp"
+            ? "image/webp"
+            : "image/png";
+      const quality = downloadFormat === "png" ? undefined : 0.95;
+      link.download = `banner-${banner.format}-${Date.now()}.${downloadFormat === "jpeg" ? "jpg" : downloadFormat}`;
+      link.href = canvas.toDataURL(mime, quality);
       link.click();
     } catch (e) {
       console.error(e);
@@ -76,7 +84,18 @@ export default function CreatedPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Созданные</h1>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">Созданные</h1>
+        <select
+          value={downloadFormat}
+          onChange={(e) => setDownloadFormat(e.target.value as "png" | "jpeg" | "webp")}
+          className="px-3 py-2 rounded-lg bg-[#161616] border border-white/20 text-white text-sm"
+        >
+          <option value="png">Скачивание: PNG</option>
+          <option value="jpeg">Скачивание: JPG</option>
+          <option value="webp">Скачивание: WEBP</option>
+        </select>
+      </div>
       <div className="grid gap-6 sm:grid-cols-2">
         {banners.map((banner) => (
           <div

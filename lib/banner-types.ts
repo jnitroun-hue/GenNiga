@@ -1,5 +1,6 @@
 export type BannerFormat = "640x134" | "1456x180" | "300x250" | "600x600";
 export type BannerTemplate = "yandex-direct" | "ozon-card" | "wb-card";
+export type BackgroundPosition = "top" | "center" | "bottom";
 
 export const BANNER_SIZES: Record<BannerFormat, { w: number; h: number }> = {
   "640x134": { w: 640, h: 134 },
@@ -12,6 +13,7 @@ export interface BannerData {
   id: string;
   format: BannerFormat;
   template?: BannerTemplate;
+  backgroundPosition?: BackgroundPosition;
   headline: string;
   subheadline: string;
   benefits: string[];

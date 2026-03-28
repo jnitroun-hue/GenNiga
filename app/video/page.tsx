@@ -14,6 +14,8 @@ export default function VideoPage() {
   const [uploadedImageData, setUploadedImageData] = useState<string | null>(null);
   const [animType, setAnimType] = useState<"slide" | "fade" | "scale">("slide");
   const [duration, setDuration] = useState(5);
+  const [resolution, setResolution] = useState<"1280x720" | "1080x1080" | "1920x1080">("1280x720");
+  const [focusPosition, setFocusPosition] = useState<"top" | "center" | "bottom">("center");
   const [loading, setLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
@@ -52,6 +54,7 @@ export default function VideoPage() {
     setVideoUrl(null);
 
     try {
+      const [width, height] = resolution.split("x").map(Number);
       const res = await fetch("/api/generate-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,6 +64,9 @@ export default function VideoPage() {
           imageSource: sourceType === "image" ? (uploadedImageData || imageUrl.trim()) : null,
           animType,
           duration,
+          width,
+          height,
+          focusPosition,
         }),
       });
 
@@ -191,6 +197,22 @@ export default function VideoPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#a1a1a6] mb-2">
+                  Разрешение видео
+                </label>
+                <select
+                  value={resolution}
+                  onChange={(e) =>
+                    setResolution(e.target.value as "1280x720" | "1080x1080" | "1920x1080")
+                  }
+                  className="w-full px-4 py-2 rounded-lg bg-[#0a0a0a] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-orange)]"
+                >
+                  <option value="1280x720">1280x720 (горизонтальное)</option>
+                  <option value="1080x1080">1080x1080 (квадрат)</option>
+                  <option value="1920x1080">1920x1080 (Full HD)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#a1a1a6] mb-2">
                   Длительность (сек)
                 </label>
                 <input
@@ -201,6 +223,22 @@ export default function VideoPage() {
                   onChange={(e) => setDuration(Number(e.target.value) || 5)}
                   className="w-full px-4 py-2 rounded-lg bg-[#0a0a0a] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-orange)]"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#a1a1a6] mb-2">
+                  Фокус по высоте (чтобы не “резало вниз”)
+                </label>
+                <select
+                  value={focusPosition}
+                  onChange={(e) =>
+                    setFocusPosition(e.target.value as "top" | "center" | "bottom")
+                  }
+                  className="w-full px-4 py-2 rounded-lg bg-[#0a0a0a] border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-orange)]"
+                >
+                  <option value="top">Верх</option>
+                  <option value="center">Центр</option>
+                  <option value="bottom">Низ</option>
+                </select>
               </div>
               <button
                 type="button"

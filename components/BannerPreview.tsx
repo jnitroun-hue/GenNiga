@@ -30,6 +30,12 @@ export function BannerPreview({ data, className = "", scale = 1 }: BannerPreview
     template === "ozon-card" ? 16 * scale : template === "wb-card" ? 20 * scale : 10 * scale;
   const badgeRadius =
     template === "ozon-card" ? 12 * scale : template === "wb-card" ? 999 : 999;
+  const bgPos =
+    data.backgroundPosition === "top"
+      ? "center top"
+      : data.backgroundPosition === "bottom"
+        ? "center bottom"
+        : "center center";
 
   return (
     <div
@@ -39,7 +45,7 @@ export function BannerPreview({ data, className = "", scale = 1 }: BannerPreview
         height: sh,
         borderRadius: cardRadius,
         background: backgroundImage
-          ? `linear-gradient(to right, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.38) 45%, rgba(0,0,0,0.14) 100%), url(\"${backgroundImage}\") center/cover no-repeat`
+          ? `linear-gradient(to right, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.38) 45%, rgba(0,0,0,0.14) 100%), url(\"${backgroundImage}\") ${bgPos}/cover no-repeat`
           : "linear-gradient(to right, #141414 0%, #242424 40%, #2f2f2f 100%)",
       }}
     >

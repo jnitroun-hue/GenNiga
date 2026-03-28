@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import type { BannerData, BannerFormat, BannerTemplate } from "@/lib/banner-types";
+import type {
+  BackgroundPosition,
+  BannerData,
+  BannerFormat,
+  BannerTemplate,
+} from "@/lib/banner-types";
 import { BANNER_SIZES } from "@/lib/banner-types";
 import { NICHE_PRESETS } from "@/lib/niche-presets";
 import { generateBackgroundImage, getStockImageForNiche } from "@/lib/image-service";
@@ -18,6 +23,8 @@ export async function POST(request: Request) {
       template = "yandex-direct",
       generateImage = false,
       customPrompt,
+      backgroundImage: customBackgroundImage,
+      backgroundPosition = "center",
     } = body;
 
     const preset = NICHE_PRESETS.find((p) => p.id === nicheId) ?? NICHE_PRESETS[NICHE_PRESETS.length - 1];
@@ -26,7 +33,10 @@ export async function POST(request: Request) {
     let backgroundImage = getStockImageForNiche(nicheId, NICHE_PRESETS, w, h);
     let backgroundProvider = "svg";
 
-    if (generateImage && (customPrompt || preset.backgroundKeywords?.length)) {
+    if (typeof customBackgroundImage === "string" && customBackgroundImage.trim()) {
+      backgroundImage = customBackgroundImage.trim();
+      backgroundProvider = "user-upload";
+    } else if (generateImage && (customPrompt || preset.backgroundKeywords?.length)) {
       const prompt = customPrompt ?? preset.backgroundKeywords.join(", ");
       const generated = await generateBackgroundImage(prompt, w, h);
       if (generated?.url) {
@@ -46,6 +56,7 @@ export async function POST(request: Request) {
       id: crypto.randomUUID(),
       format: format as BannerFormat,
       template: template as BannerTemplate,
+      backgroundPosition: backgroundPosition as BackgroundPosition,
       headline: headline || preset.headlineExamples[0],
       subheadline: subheadline || preset.subheadlineExamples[0],
       benefits: benefits.length ? benefits : preset.benefitExamples,

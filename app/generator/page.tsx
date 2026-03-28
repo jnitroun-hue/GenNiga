@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { BannerPreview } from "@/components/BannerPreview";
 import { saveBanner } from "@/lib/storage";
-import type { BannerData, BannerFormat, BannerTemplate } from "@/lib/banner-types";
+import type {
+  BackgroundPosition,
+  BannerData,
+  BannerFormat,
+  BannerTemplate,
+} from "@/lib/banner-types";
 import { NICHE_PRESETS } from "@/lib/niche-presets";
 import { Sparkles, Loader2, Zap } from "lucide-react";
 
@@ -26,6 +31,9 @@ export default function GeneratorPage() {
   const [template, setTemplate] = useState<BannerTemplate>("yandex-direct");
   const [generateImage, setGenerateImage] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [backgroundUrl, setBackgroundUrl] = useState("");
+  const [backgroundUpload, setBackgroundUpload] = useState<string | null>(null);
+  const [backgroundPosition, setBackgroundPosition] = useState<BackgroundPosition>("center");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BannerData | null>(null);
   const [provider, setProvider] = useState<string | null>(null);
@@ -49,6 +57,7 @@ export default function GeneratorPage() {
     setWarnings([]);
 
     try {
+      const manualBackground = backgroundUpload || backgroundUrl.trim();
       const res = await fetch("/api/generate-card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,8 +70,10 @@ export default function GeneratorPage() {
           accentColor,
           logoText: logoText || undefined,
           template,
-          generateImage,
+          generateImage: manualBackground ? false : generateImage,
           customPrompt: customPrompt || undefined,
+          backgroundImage: manualBackground || undefined,
+          backgroundPosition,
         }),
       });
 
@@ -81,6 +92,22 @@ export default function GeneratorPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackgroundUpload = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Выберите изображение (JPG/PNG/WEBP)");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : null;
+      if (!result) return;
+      setBackgroundUpload(result);
+      setGenerateImage(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -250,6 +277,44 @@ export default function GeneratorPage() {
             )}
             <p className="mt-1 text-xs text-[#6b6b70]">
               Прод-цепочка: ComfyUI → Pollinations → fal.ai → SVG fallback.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-[#161616] p-4 space-y-3">
+            <p className="text-sm font-medium text-white">Свой фон (из галереи или URL)</p>
+            <input
+              type="url"
+              value={backgroundUrl}
+              onChange={(e) => {
+                setBackgroundUrl(e.target.value);
+                if (e.target.value.trim()) {
+                  setBackgroundUpload(null);
+                  setGenerateImage(false);
+                }
+              }}
+              placeholder="https://..."
+              className="w-full px-3 py-2 rounded-lg bg-[#0a0a0a] border border-white/10 text-sm text-white placeholder:text-[#6b6b70]"
+            />
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => handleBackgroundUpload(e.target.files?.[0] ?? null)}
+              className="w-full px-4 py-2 rounded-lg bg-[#0a0a0a] border border-white/10 text-white file:mr-3 file:rounded-md file:border-0 file:bg-[var(--brand-orange)] file:px-3 file:py-1 file:text-white file:cursor-pointer"
+            />
+            <div>
+              <label className="block text-xs text-[#a1a1a6] mb-1">Позиция фона</label>
+              <select
+                value={backgroundPosition}
+                onChange={(e) => setBackgroundPosition(e.target.value as BackgroundPosition)}
+                className="w-full px-3 py-2 rounded-lg bg-[#0a0a0a] border border-white/10 text-sm text-white"
+              >
+                <option value="top">Верх</option>
+                <option value="center">Центр</option>
+                <option value="bottom">Низ</option>
+              </select>
+            </div>
+            <p className="text-xs text-[#6b6b70]">
+              Если указан свой фон, AI-генерация фона отключается автоматически.
             </p>
           </div>
 

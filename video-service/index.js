@@ -42,6 +42,7 @@ app.post("/render", async (req, res) => {
       duration = 5,
       width = 1280,
       height = 720,
+      focusPosition = "center",
     } = req.body || {};
 
     const seconds = clampNumber(duration, 3, 20, 5);
@@ -79,6 +80,7 @@ app.post("/render", async (req, res) => {
       duration: seconds,
       width: outW,
       height: outH,
+      focusPosition,
     });
 
     await fs.rename(outputTmpPath, outputFinalPath);
@@ -150,10 +152,18 @@ function parseDataImage(dataUri) {
   return { buffer: Buffer.from(base64, "base64"), ext };
 }
 
-async function renderVideo({ inputPath, outputPath, animType, duration, width, height }) {
+async function renderVideo({
+  inputPath,
+  outputPath,
+  animType,
+  duration,
+  width,
+  height,
+  focusPosition,
+}) {
   if (!ffmpegPath) throw new Error("ffmpeg binary not found");
 
-  const filter = buildFilter(animType, duration, width, height);
+  const filter = buildFilter(animType, duration, width, height, focusPosition);
   const args = [
     "-y",
     "-loop",
@@ -176,23 +186,30 @@ async function renderVideo({ inputPath, outputPath, animType, duration, width, h
   await runFfmpeg(args);
 }
 
-function buildFilter(animType, duration, width, height) {
+function buildFilter(animType, duration, width, height, focusPosition) {
   const base = `scale=${width * 1.5}:${height * 1.5}:force_original_aspect_ratio=increase`;
+  const yExpr =
+    focusPosition === "top"
+      ? "0"
+      : focusPosition === "bottom"
+        ? `(in_h-${height})`
+        : `(in_h-${height})/2`;
+  const centeredCrop = `crop=${width}:${height}:x='(in_w-${width})/2':y='${yExpr}'`;
 
   if (animType === "fade") {
     const outStart = Math.max(0.8, duration - 0.8);
-    return `${base},crop=${width}:${height},fade=t=in:st=0:d=0.6,fade=t=out:st=${outStart}:d=0.6`;
+    return `${base},${centeredCrop},fade=t=in:st=0:d=0.6,fade=t=out:st=${outStart}:d=0.6`;
   }
 
   if (animType === "scale") {
     return (
-      `${base},crop=${width}:${height},` +
+      `${base},${centeredCrop},` +
       `zoompan=z='min(1+0.0007*on,1.12)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${width}x${height}:fps=30`
     );
   }
 
   // slide
-  return `${base},crop=${width}:${height}:x='(in_w-${width})*t/${duration}':y='(in_h-${height})/2'`;
+  return `${base},crop=${width}:${height}:x='(in_w-${width})*t/${duration}':y='${yExpr}'`;
 }
 
 function runFfmpeg(args) {

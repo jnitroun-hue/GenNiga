@@ -2,7 +2,16 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { sourceType = "banner", banner, imageSource, animType, duration } = await request.json();
+    const {
+      sourceType = "banner",
+      banner,
+      imageSource,
+      animType,
+      duration,
+      width,
+      height,
+      focusPosition,
+    } = await request.json();
 
     if (sourceType === "banner" && !banner) {
       return NextResponse.json(
@@ -54,7 +63,16 @@ export async function POST(request: Request) {
             ? { Authorization: `Bearer ${process.env.VIDEO_SERVICE_TOKEN}` }
             : {}),
         },
-        body: JSON.stringify({ sourceType, banner, imageSource, animType, duration }),
+        body: JSON.stringify({
+          sourceType,
+          banner,
+          imageSource,
+          animType,
+          duration,
+          width,
+          height,
+          focusPosition,
+        }),
         signal: controller.signal,
         cache: "no-store",
       });
