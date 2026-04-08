@@ -9,6 +9,7 @@ import {
   ImageIcon,
   Video,
   FolderOpen,
+  Shield,
   Menu,
   X,
 } from "lucide-react";
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/generator", label: "Генератор банера", icon: ImageIcon },
   { href: "/video", label: "Генератор видео", icon: Video },
   { href: "/created", label: "Созданные", icon: FolderOpen },
+  { href: "/vpn", label: "VPN", icon: Shield },
 ];
 
 export function LayoutClient({ children }: { children: React.ReactNode }) {
